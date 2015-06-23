@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_settings">Paramètres</string>
+    <string name="action_listen_now">A écouter</string>
+
+    <string name="open_content_desc">Ouvrir le panneau de navigation</string>
+    <string name="close_content_desc">Fermer le panneau de navigation</string>
+
+    <string name="edit_text_hint_toolbar">Rechercher de la musique</string>
+
+    <string name="header_text_search_artist">Artistes</string>
+    <string name="no_result_found_text">Aucun résultat trouvé.</string>
+
+    <string name="header_text_top_tracks">Top Titres</string>
+    <string name="no_top_tracks_found_text">Aucun top titres trouvé.</string>
+</resources>

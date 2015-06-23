@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Spotify Streamer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="action_listen_now">Listen Now</string>
+
+    <string name="open_content_desc">Open navigation drawer</string>
+    <string name="close_content_desc">Close navigation drawer</string>
+
+    <string name="edit_text_hint_toolbar">Search music</string>
+
+    <string name="header_text_search_artist">Artist</string>
+    <string name="no_result_found_text">No results found.</string>
+
+    <string name="header_text_top_tracks">Top Tracks</string>
+    <string name="no_top_tracks_found_text">No top tracks found.</string>
+
+    <string name="transition_image_key" translatable="false">TRANSITION_IMAGE</string>
+
+</resources>
