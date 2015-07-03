@@ -1,9 +1,11 @@
 package io.github.kmenager.spotifystreamer;
 
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.util.Pair;
@@ -13,7 +15,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -30,15 +31,9 @@ import java.util.List;
 import io.github.kmenager.spotifystreamer.adapters.SearchArtistAdapter;
 import io.github.kmenager.spotifystreamer.model.ArtistData;
 import io.github.kmenager.spotifystreamer.views.MarginDecoration;
-import kaaes.spotify.webapi.android.SpotifyApi;
-import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
-import kaaes.spotify.webapi.android.models.ArtistsPager;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 
-public class SearchActivity extends AppCompatActivity {
+public class SearchActivity extends AppCompatActivity implements GetArtistsFragment.GetArtistsCallbacks{
 
 
     public static final String ARTIST_INTENT = "ARTIST_INTENT";
@@ -52,8 +47,9 @@ public class SearchActivity extends AppCompatActivity {
     private ProgressBar mProgressBar;
     private View mErrorResultView;
 
-    private SpotifyApi api = new SpotifyApi();
-    private SpotifyService spotifyService = api.getService();
+    private static final String TAG_GET_ARTISTS_FRAGMENT = "GET_ARTISTs_FRAGMENT";
+    private GetArtistsFragment mGetArtistsFragment;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +82,24 @@ public class SearchActivity extends AppCompatActivity {
             getWindow().setStatusBarColor(getResources().getColor(R.color.primary_dark));
         }
 
+
+        FragmentManager fm = getFragmentManager();
+        mGetArtistsFragment = (GetArtistsFragment) fm.findFragmentByTag(TAG_GET_ARTISTS_FRAGMENT);
+
+        if (mGetArtistsFragment == null) {
+            mGetArtistsFragment = new GetArtistsFragment();
+            fm.beginTransaction().add(mGetArtistsFragment, TAG_GET_ARTISTS_FRAGMENT).commit();
+        }
+
+
+
         showProgressBar(false);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+        outState.putString("keyword", mEditSearch.getText().toString());
     }
 
     private void onInitToolbar() {
@@ -108,32 +121,9 @@ public class SearchActivity extends AppCompatActivity {
 
                     showEmptyView(false);
                     showProgressBar(true);
-                    getArtists(v.getText().toString());
+                    mGetArtistsFragment.getArtists(v.getText().toString());
                 }
                 return false;
-            }
-        });
-    }
-
-    private void getArtists(String keyword) {
-        spotifyService.searchArtists(keyword, new Callback<ArtistsPager>() {
-            @Override
-            public void success(ArtistsPager artistsPager, Response response) {
-                final List<Artist> artists = artistsPager.artists.items;
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        refreshAdapterArtists(artists);
-                        showKeyboard(false);
-                        showProgressBar(false);
-                    }
-                });
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                Log.d("test", error.toString());
             }
         });
     }
@@ -250,5 +240,22 @@ public class SearchActivity extends AppCompatActivity {
 
     private void showErrorResultView(boolean visible) {
         mErrorResultView.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void onPreExecute() {
+
+    }
+
+    @Override
+    public void onCancelled() {
+
+    }
+
+    @Override
+    public void onPostExecute(List<Artist> artists) {
+        refreshAdapterArtists(artists);
+        showKeyboard(false);
+        showProgressBar(false);
     }
 }
