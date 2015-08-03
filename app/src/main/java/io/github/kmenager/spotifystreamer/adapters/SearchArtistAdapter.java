@@ -15,8 +15,6 @@ import java.util.List;
 
 import io.github.kmenager.spotifystreamer.R;
 import io.github.kmenager.spotifystreamer.model.ArtistData;
-import kaaes.spotify.webapi.android.models.Artist;
-import kaaes.spotify.webapi.android.models.Image;
 
 
 public class SearchArtistAdapter extends RecyclerView.Adapter<SearchArtistAdapter.SearchArtistAdapterHolder> {
@@ -24,12 +22,12 @@ public class SearchArtistAdapter extends RecyclerView.Adapter<SearchArtistAdapte
     private static final int ITEM_VIEW_TYPE_HEADER = 0;
     private static final int ITEM_VIEW_TYPE_ITEM = 1;
 
-    private List<Artist> mArtists;
+    private List<ArtistData> mArtists;
     final private Context mContext;
     private final View mHeader;
     final private SearchArtistAdapterOnClickHandler mClickHandler;
 
-    public SearchArtistAdapter(Context context, List<Artist> artists, View header, SearchArtistAdapterOnClickHandler clickHandler) {
+    public SearchArtistAdapter(Context context, List<ArtistData> artists, View header, SearchArtistAdapterOnClickHandler clickHandler) {
         mContext = context;
         mArtists = artists;
         mHeader = header;
@@ -51,7 +49,7 @@ public class SearchArtistAdapter extends RecyclerView.Adapter<SearchArtistAdapte
         }
 
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.list_item_artist, parent, false);
+                .inflate(R.layout.row_search_artist, parent, false);
         return new SearchArtistAdapterHolder(view, ITEM_VIEW_TYPE_ITEM);
     }
 
@@ -70,13 +68,11 @@ public class SearchArtistAdapter extends RecyclerView.Adapter<SearchArtistAdapte
 
     @Override
     public int getItemCount() {
-        if (mArtists == null)
-            return 0;
-        else
-            return mArtists.size() + 1;
+        if (mArtists != null) return mArtists.size() + 1; // The first element is the list title, so we add + 1
+        return 0;
     }
 
-    public void reset(List<Artist> artists) {
+    public void reset(List<ArtistData> artists) {
         if (mArtists != null) {
             mArtists.clear();
             if (artists != null) {
@@ -94,7 +90,7 @@ public class SearchArtistAdapter extends RecyclerView.Adapter<SearchArtistAdapte
 
         public ImageView mImageViewIcon;
         public TextView mTextViewName;
-        private Artist mArtist;
+        private ArtistData mArtist;
         public SearchArtistAdapterHolder(View itemView, int viewType) {
             super(itemView);
             if (viewType == ITEM_VIEW_TYPE_ITEM) {
@@ -104,29 +100,25 @@ public class SearchArtistAdapter extends RecyclerView.Adapter<SearchArtistAdapte
             }
         }
 
-        public void bindView(Artist artist) {
+        public void bindView(ArtistData artist) {
             mArtist = artist;
-            List<Image> images = artist.images;
-            mImageViewIcon.setImageResource(R.drawable.ic_empty_artist);
-            if (!images.isEmpty()) {
+
+            if (artist.getUrlImage() != null) {
                 Glide.with(mContext)
-                        .load(images.get(0).url)
+                        .load(artist.getUrlImage())
                         .placeholder(R.drawable.ic_empty_artist)
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .crossFade()
                         .into(mImageViewIcon);
+            } else {
+                mImageViewIcon.setImageResource(R.drawable.ic_empty_artist);
             }
-            mTextViewName.setText(artist.name);
+            mTextViewName.setText(artist.getName());
         }
 
         @Override
         public void onClick(View v) {
-            ArtistData artistData = new ArtistData();
-            artistData.setArtistId(mArtist.id);
-            artistData.setName(mArtist.name);
-            if (!mArtist.images.isEmpty()) {
-               artistData.setUrlImage(mArtist.images.get(0).url);
-            }
-            mClickHandler.onClick(artistData, this);
+            mClickHandler.onClick(mArtist, this);
         }
     }
 }

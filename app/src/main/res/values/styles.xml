@@ -16,4 +16,9 @@
         <!--<item name="android:textCursorDrawable">@drawable/custom_cursor_edittext</item>-->
         <item name="android:focusableInTouchMode">true</item>
     </style>
+
+    <style name="Toolbar" parent="Widget.AppCompat.Toolbar">
+        <item name="android:background">?attr/colorPrimary</item>
+        <item name="popupTheme">@style/Theme.AppCompat.Light</item>
+    </style>
 </resources>

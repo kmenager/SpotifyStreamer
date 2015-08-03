@@ -3,17 +3,16 @@
     package="io.github.kmenager.spotifystreamer" >
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
+        android:configChanges="orientation|screenSize"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme"
-        android:configChanges="orientation|screenSize">
+        android:theme="@style/AppTheme" >
         <activity
-            android:name=".MainActivity"
-            android:label="@string/app_name"
-            >
+            android:name=".activities.SearchActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -21,20 +20,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SearchActivity"
-            android:parentActivityName=".MainActivity"
-            android:configChanges="orientation|screenSize">
+            android:name=".activities.ArtistActivity"
+            android:parentActivityName=".activities.SearchActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="io.github.kmenager.spotifystreamer.MainActivity" />
-        </activity>
-        <activity
-            android:name=".ArtistActivity"
-            android:parentActivityName=".SearchActivity"
-            android:configChanges="orientation|screenSize">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="io.github.kmenager.spotifystreamer.SearchActivity" />
+                android:value=".activities.SearchActivity" />
         </activity>
     </application>
 

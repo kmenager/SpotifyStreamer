@@ -16,5 +16,8 @@
     <string name="no_top_tracks_found_text">No top tracks found.</string>
 
     <string name="transition_image_key" translatable="false">TRANSITION_IMAGE</string>
+    <string name="title_activity_test">Test</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_main2">Main2Activity</string>
 
 </resources>

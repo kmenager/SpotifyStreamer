@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_search"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:elevation="4dp"
+        app:layout_scrollFlags="scroll|enterAlways"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        android:background="?attr/colorPrimary">
+
+        <EditText
+            android:id="@+id/edit_search"
+            style="@style/EditTextSearch"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:cursorVisible="true"
+            android:hint="@string/edit_text_hint_toolbar"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingStart="@dimen/activity_horizontal_margin"/>
+    </android.support.v7.widget.Toolbar>
+
+    <!-- This is used as a strut to create two columns in our RelativeLayout -->
+    <android.support.v4.widget.Space
+        android:id="@+id/layout_center"
+        android:layout_width="4dp"
+        android:layout_height="0dp"
+        android:layout_centerInParent="true"/>
+
+    <fragment
+        android:id="@+id/fragment_search"
+        android:name="io.github.kmenager.spotifystreamer.fragments.SearchArtistFragment"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_alignEnd="@id/layout_center"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@id/layout_center"
+        android:layout_below="@id/toolbar_search"
+        android:choiceMode="singleChoice"
+        tools:layout="@android:layout/list_content"
+        />
+
+    <!-- This is used to give the card the appropriate margin
+         list_item_extra_padding +
+         abc_list_item_padding_horizontal_material -->
+    <android.support.v7.widget.Space
+        android:id="@+id/cardviewAligner"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignLeft="@id/layout_center"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignStart="@id/layout_center"
+        android:layout_marginEnd="0dp"
+        android:layout_marginRight="0dp"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:elevation="@dimen/appbar_elevation"
+        />
+
+    <FrameLayout
+        android:id="@+id/fragment"
+        android:name="io.github.kmenager.spotifystreamer.fragments.ArtistFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignLeft="@id/cardviewAligner"
+        android:layout_alignRight="@id/cardviewAligner"
+        android:layout_alignTop="@id/cardviewAligner"
+        android:layout_alignBottom="@id/cardviewAligner"
+        android:layout_marginRight="@dimen/abc_list_item_padding_horizontal_material"
+        android:layout_marginEnd="@dimen/abc_list_item_padding_horizontal_material"
+        tools:layout="@android:layout/list_content"
+        />
+
+</RelativeLayout>

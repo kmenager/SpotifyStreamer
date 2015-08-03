@@ -11,6 +11,7 @@ public class TrackData implements Parcelable {
     private long mDuration; // ms
     private String mUrlAlbum;
     private String mArtistName;
+    private String mAlbumName;
 
     public TrackData() {}
 
@@ -20,6 +21,7 @@ public class TrackData implements Parcelable {
         mDuration = in.readLong();
         mUrlAlbum = in.readString();
         mArtistName = in.readString();
+        mAlbumName = in.readString();
     }
 
     @Override
@@ -34,6 +36,7 @@ public class TrackData implements Parcelable {
         dest.writeLong(mDuration);
         dest.writeString(mUrlAlbum);
         dest.writeString(mArtistName);
+        dest.writeString(mAlbumName);
     }
 
     public static final Creator<TrackData> CREATOR = new Creator<TrackData>() {
@@ -88,5 +91,11 @@ public class TrackData implements Parcelable {
         mArtistName = artistName;
     }
 
+    public void setAlbumName(String albumName) {
+        mAlbumName = albumName;
+    }
 
+    public String getAlbumName() {
+        return mAlbumName;
+    }
 }

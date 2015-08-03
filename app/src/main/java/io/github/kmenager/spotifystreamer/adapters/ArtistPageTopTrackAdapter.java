@@ -13,13 +13,8 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.util.List;
 
-import butterknife.ButterKnife;
-import butterknife.InjectView;
 import io.github.kmenager.spotifystreamer.R;
 import io.github.kmenager.spotifystreamer.model.TrackData;
-import kaaes.spotify.webapi.android.models.ArtistSimple;
-import kaaes.spotify.webapi.android.models.Image;
-import kaaes.spotify.webapi.android.models.Track;
 
 
 public class ArtistPageTopTrackAdapter extends RecyclerView.Adapter<ArtistPageTopTrackAdapter.ArtistPageTopTrackAdapterHolder> {
@@ -30,9 +25,9 @@ public class ArtistPageTopTrackAdapter extends RecyclerView.Adapter<ArtistPageTo
     private final View mHeader;
     private final Context mContext;
     private final ArtistPageTopTrackAdapterOnClickHandler mClickHandler;
-    private List<Track> mTracks;
+    private List<TrackData> mTracks;
 
-    public ArtistPageTopTrackAdapter(Context context, List<Track> tracks, View header, ArtistPageTopTrackAdapterOnClickHandler clickHandler) {
+    public ArtistPageTopTrackAdapter(Context context, List<TrackData> tracks, View header, ArtistPageTopTrackAdapterOnClickHandler clickHandler) {
         mContext = context;
         mTracks = tracks;
         mHeader = header;
@@ -72,11 +67,12 @@ public class ArtistPageTopTrackAdapter extends RecyclerView.Adapter<ArtistPageTo
 
     @Override
     public int getItemCount() {
-        if (mTracks != null) return mTracks.size() + 1;
+        if (mTracks != null)
+            return mTracks.size() + 1; // The first element is the list title, so we add + 1
         return 0;
     }
 
-    public void reset(List<Track> tracks) {
+    public void reset(List<TrackData> tracks) {
         mTracks.clear();
         if (tracks != null) {
             mTracks.addAll(tracks);
@@ -87,61 +83,45 @@ public class ArtistPageTopTrackAdapter extends RecyclerView.Adapter<ArtistPageTo
     public class ArtistPageTopTrackAdapterHolder extends RecyclerView.ViewHolder
             implements View.OnClickListener {
 
-        @InjectView(R.id.track_icon)
-        ImageView mTrackIcon;
-        @InjectView(R.id.song_name)
-        TextView mSongName;
-        @InjectView(R.id.artist_name)
-        TextView mArtistName;
+        private ImageView mTrackIcon;
+        private TextView mSongName;
+        private TextView mArtistName;
 
-        Track mTrack;
+        TrackData mTrack;
 
         public ArtistPageTopTrackAdapterHolder(View itemView, int viewType) {
             super(itemView);
             if (viewType == ITEM_VIEW_TYPE_ITEM) {
-                ButterKnife.inject(this, itemView);
+                mTrackIcon = (ImageView) itemView.findViewById(R.id.track_icon);
+                mSongName = (TextView) itemView.findViewById(R.id.song_name);
+                mArtistName = (TextView) itemView.findViewById(R.id.artist_name);
                 itemView.setOnClickListener(this);
             }
         }
 
-        public void bindView(Track track) {
+        public void bindView(TrackData track) {
             mTrack = track;
 
-            mSongName.setText(mTrack.name);
-            List<Image> images = mTrack.album.images;
-            if (!images.isEmpty()) {
+            mSongName.setText(mTrack.getName());
+            if (mTrack.getUrlAlbum() != null) {
                 Glide.with(mContext)
-                        .load(images.get(0).url)
+                        .load(mTrack.getUrlAlbum())
                         .placeholder(R.drawable.ic_album_empty)
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .crossFade()
                         .into(mTrackIcon);
-            }
-            else {
+            } else {
                 mTrackIcon.setImageResource(R.drawable.ic_album_empty);
             }
-            List<ArtistSimple> artistSimples = mTrack.artists;
-            if (!artistSimples.isEmpty()) {
-                mArtistName.setText(artistSimples.get(0).name);
-            }
+
+            mArtistName.setText(mTrack.getArtistName());
+
 
         }
 
         @Override
         public void onClick(View v) {
-            TrackData trackData = new TrackData();
-            trackData.setName(mTrack.name);
-            List<ArtistSimple> artistSimples = mTrack.artists;
-            if (!artistSimples.isEmpty()) {
-                trackData.setArtistName(artistSimples.get(0).name);
-            }
-
-            trackData.setDuration(mTrack.duration_ms);
-            trackData.setPreviewUrl(mTrack.preview_url);
-            List<Image> images = mTrack.album.images;
-            if (!images.isEmpty()) {
-                trackData.setUrlAlbum(images.get(0).url);
-            }
-            mClickHandler.onClick(trackData, this);
+            mClickHandler.onClick(mTrack, this);
         }
     }
 }
