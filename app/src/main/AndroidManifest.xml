@@ -26,6 +26,21 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.SearchActivity" />
         </activity>
+        <service
+            android:name=".MusicService"
+            android:enabled="true"
+            android:exported="false" >
+        </service>
+
+        <activity
+            android:name=".SettingsActivity"
+            android:label="Settings"
+            android:theme="@style/SettingsTheme"
+            android:parentActivityName=".activities.SearchActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.SearchActivity" />
+        </activity>
     </application>
 
 </manifest>

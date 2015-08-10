@@ -1,91 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.GridLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:columnCount="5">
+    android:orientation="vertical"
+    android:paddingBottom="16dp"
+    android:paddingTop="16dp">
 
-    <android.support.v7.widget.Space
-        android:layout_height="8dp"
-        app:layout_columnSpan="5"
-        app:layout_columnWeight="1"
-        app:layout_rowWeight="1"/>
 
     <TextView
         android:id="@+id/artistName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         android:gravity="center_horizontal"
         android:textAppearance="@style/TextAppearance.AppCompat.Title"
-        app:layout_columnSpan="5"
-        app:layout_columnWeight="1"
-        app:layout_gravity="fill_horizontal"
         tools:text="New Text"/>
 
     <TextView
         android:id="@+id/albumName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         android:gravity="center_horizontal"
-        android:text="New Text"
         android:textAppearance="@style/TextAppearance.AppCompat.Title"
-        app:layout_columnSpan="5"
-        app:layout_columnWeight="1"
-        app:layout_gravity="fill_horizontal"/>
+        tools:text="New Text"/>
 
     <ImageView
         android:id="@+id/albumArtwork"
-        android:gravity="center_horizontal"
-        app:layout_columnSpan="5"
-        app:layout_columnWeight="1"
-        app:layout_gravity="fill_horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         tools:src="@drawable/ic_album_empty"/>
 
     <TextView
         android:id="@+id/trackName"
-        android:gravity="center_horizontal"
-        app:layout_columnSpan="5"
-        app:layout_columnWeight="1"
-        app:layout_gravity="fill_horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         tools:text="New Text"/>
 
     <SeekBar
         android:id="@+id/seekBar"
-        android:gravity="center_horizontal"
-        android:theme="@android:style/Theme.Material"
-        app:layout_columnSpan="5"
-        app:layout_columnWeight="1"
-        app:layout_gravity="fill_horizontal"/>
-
-    <TextView
-        android:id="@+id/trackCurrent"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="16dp"
-        android:paddingStart="16dp"
-        android:text="New Text"
-        app:layout_column="0"
-        app:layout_columnWeight="1"/>
+        android:gravity="center_horizontal"
+        android:theme="@android:style/Theme.Material"/>
 
-    <TextView
-        android:id="@+id/trackDuration"
-        android:layout_width="wrap_content"
-        android:paddingEnd="16dp"
-        android:paddingRight="16dp"
-        android:text="New Text"
-        app:layout_column="4"
-        app:layout_columnWeight="1"
-        app:layout_gravity="right"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
-    <android.support.v7.widget.Space
-        android:layout_height="3dp"
-        app:layout_columnSpan="5"
-        app:layout_columnWeight="1"
-        app:layout_rowWeight="1"/>
+        <TextView
+            android:id="@+id/trackCurrent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="left|start"
+            android:paddingLeft="16dp"
+            android:paddingStart="16dp"
+            tools:text="New Text"/>
+
+        <TextView
+            android:id="@+id/trackDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="right|end"
+            android:paddingEnd="16dp"
+            android:paddingRight="16dp"
+            tools:text="New Text"/>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
-        app:layout_columnSpan="5"
-        app:layout_columnWeight="1"
+        android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal">
 
@@ -93,30 +86,25 @@
             android:id="@+id/previous"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:background="@null"
-            android:src="@drawable/ic_skip_previous_black_36dp"
-            android:layout_weight="1"/>
+            android:src="@drawable/ic_skip_previous_black_36dp"/>
 
         <ImageButton
             android:id="@+id/playPause"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@null"
             android:layout_weight="1"
+            android:background="@null"
             tools:src="@drawable/ic_play_circle_filled_black_48dp"/>
 
         <ImageButton
             android:id="@+id/next"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:background="@null"
-            android:src="@drawable/ic_skip_next_black_36dp"
-            android:layout_weight="1"/>
+            android:src="@drawable/ic_skip_next_black_36dp"/>
     </LinearLayout>
 
-    <android.support.v7.widget.Space
-        android:layout_height="8dp"
-        app:layout_columnSpan="5"
-        app:layout_columnWeight="1"
-        app:layout_rowWeight="1"/>
-</android.support.v7.widget.GridLayout>
+</LinearLayout>

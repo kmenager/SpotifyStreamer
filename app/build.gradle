@@ -41,4 +41,7 @@ dependencies {
 
     // Get image
     compile 'com.github.bumptech.glide:glide:3.6.0'
+
+    // Country code support
+    compile 'com.neovisionaries:nv-i18n:1.17'
 }

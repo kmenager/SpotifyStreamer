@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item type="layout" name="fragment_artist_start">@layout/fragment_artist_twopane</item>
+    <bool name="is_two_pane">true</bool>
 </resources>

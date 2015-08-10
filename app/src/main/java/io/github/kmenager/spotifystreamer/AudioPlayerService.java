@@ -3,11 +3,12 @@ package io.github.kmenager.spotifystreamer;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 
 public class AudioPlayerService extends IntentService implements
-    MediaPlayer.OnPreparedListener{
+    MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener{
 
     private static final String TAG = AudioPlayerService.class.getSimpleName();
 
@@ -25,6 +26,13 @@ public class AudioPlayerService extends IntentService implements
      */
     public AudioPlayerService() {
         super(TAG);
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mPlayer = new MediaPlayer();
+        mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
     }
 
     @Override
@@ -111,6 +119,7 @@ public class AudioPlayerService extends IntentService implements
         Uri mUri = Uri.parse(previewUrl);
         mPlayer = MediaPlayer.create(context, mUri);
         mPlayer.setOnPreparedListener(this);
+        mPlayer.setOnCompletionListener(this);
         if (seekTo != -1) {
             mPlayer.seekTo(seekTo);
         }
@@ -119,5 +128,10 @@ public class AudioPlayerService extends IntentService implements
     @Override
     public void onPrepared(MediaPlayer mp) {
         mp.start();
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+
     }
 }

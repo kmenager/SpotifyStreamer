@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pref_notification_visibility">
+        <item>Show all notification content</item>
+        <item>Hide sensitive notification content</item>
+        <item>Don\'t show notification at all</item>
+    </string-array>
+
+    <string-array name="pref_notification_visibility_values">
+        <item>PUBLIC</item>
+        <item>PRIVATE</item>
+        <item>SECRET</item>
+    </string-array>
+</resources>

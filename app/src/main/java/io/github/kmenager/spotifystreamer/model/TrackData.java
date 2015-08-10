@@ -6,6 +6,7 @@ import android.os.Parcelable;
 
 public class TrackData implements Parcelable {
 
+    private String mId;
     private String mName;
     private String mPreviewUrl;
     private long mDuration; // ms
@@ -16,6 +17,7 @@ public class TrackData implements Parcelable {
     public TrackData() {}
 
     protected TrackData(Parcel in) {
+        mId = in.readString();
         mName = in.readString();
         mPreviewUrl = in.readString();
         mDuration = in.readLong();
@@ -31,6 +33,7 @@ public class TrackData implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mId);
         dest.writeString(mName);
         dest.writeString(mPreviewUrl);
         dest.writeLong(mDuration);
@@ -97,5 +100,13 @@ public class TrackData implements Parcelable {
 
     public String getAlbumName() {
         return mAlbumName;
+    }
+
+    public String getId() {
+        return mId;
+    }
+
+    public void setId(String id) {
+        mId = id;
     }
 }

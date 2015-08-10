@@ -1,7 +1,9 @@
 package io.github.kmenager.spotifystreamer.activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -15,11 +17,17 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import io.github.kmenager.spotifystreamer.MusicService;
 import io.github.kmenager.spotifystreamer.R;
+import io.github.kmenager.spotifystreamer.SettingsActivity;
+import io.github.kmenager.spotifystreamer.fragments.MediaPlayerDialogFragment;
 import io.github.kmenager.spotifystreamer.fragments.SearchArtistFragment;
+import io.github.kmenager.spotifystreamer.model.TrackData;
 
 public class SearchActivity extends AppCompatActivity implements SpotifyRequest.SpotifyRequestCallback {
 
@@ -32,6 +40,7 @@ public class SearchActivity extends AppCompatActivity implements SpotifyRequest.
     private Toolbar mToolbar;
     private EditText mEditSearch;
     private String mKeyword;
+    private boolean mTwoPane;
 
 
     @Override
@@ -40,7 +49,9 @@ public class SearchActivity extends AppCompatActivity implements SpotifyRequest.
         setContentView(R.layout.activity_search);
         mToolbar = (Toolbar) findViewById(R.id.toolbar_search);
         mEditSearch = (EditText) findViewById(R.id.edit_search);
-        
+
+        mTwoPane = getResources().getBoolean(R.bool.is_two_pane);
+
         FragmentManager fm = getSupportFragmentManager();
         mSearchArtistFragment = (SearchArtistFragment) fm.findFragmentById(R.id.fragment_search);
         if (mSearchArtistFragment == null) {
@@ -49,7 +60,6 @@ public class SearchActivity extends AppCompatActivity implements SpotifyRequest.
                     .add(R.id.fragment_search, mSearchArtistFragment)
                     .commit();
         }
-
         onInitToolbar();
         onInitEditText();
 
@@ -77,10 +87,18 @@ public class SearchActivity extends AppCompatActivity implements SpotifyRequest.
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    if (mTwoPane) {
+                        if (mKeyword != null && !mKeyword.equals(v.getText().toString())) {
+                            Fragment fragment = getSupportFragmentManager()
+                                    .findFragmentByTag(ArtistActivity.TAG_ARTIST_FRAGMENT);
+                            getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+                        }
+                    }
                     mSearchArtistFragment.showEmptyView(false);
                     mSearchArtistFragment.showProgressBar(true);
                     mKeyword = v.getText().toString();
                     mSpotifyRequest.getArtists(mKeyword);
+
                 }
                 return false;
             }
@@ -89,23 +107,58 @@ public class SearchActivity extends AppCompatActivity implements SpotifyRequest.
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_search, menu);
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        /*
         if (mEditSearch.getVisibility() == View.VISIBLE) {
             menu.findItem(R.id.action_collapse_keyboard).setIcon(R.drawable.ic_close_white);
         } else {
             menu.findItem(R.id.action_collapse_keyboard).setIcon(R.drawable.ic_search_white);
-        }
+        }*/
         return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+
+        if (id == R.id.action_playing) {
+            if (MusicService.getInstance() != null) {
+                ArrayList<TrackData> trackDatas = MusicService.getInstance().getTracks();
+                int currentPosition = MusicService.getInstance().getPosition();
+
+                if (trackDatas != null && trackDatas.size() > 0) {
+                    FragmentManager fm = getSupportFragmentManager();
+                    MediaPlayerDialogFragment player = MediaPlayerDialogFragment.newInstance(trackDatas,
+                            currentPosition);
+
+                    player.show(fm, MediaPlayerDialogFragment.TAG_MEDIA_PLAYER);
+
+                    return true;
+                } else {
+                /*
+                new MaterialDialog.Builder(this)
+                        .title(R.string.no_music_title)
+                        .content(R.string.no_music_message)
+                        .positiveText(R.string.OK)
+                        .show();
+                        */
+                }
+            } else {
+                Toast.makeText(this, "No music playing", Toast.LENGTH_LONG).show();
+            }
+
+        }
+
+        if (id == R.id.action_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        }
+
 
         if (id == R.id.action_collapse_keyboard) {
             switchVisibilityEditSearch();
