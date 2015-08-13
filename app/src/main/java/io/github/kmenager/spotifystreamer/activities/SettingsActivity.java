@@ -1,4 +1,4 @@
-package io.github.kmenager.spotifystreamer;
+package io.github.kmenager.spotifystreamer.activities;
 
 
 import android.os.Bundle;
@@ -14,6 +14,8 @@ import com.neovisionaries.i18n.CountryCode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import io.github.kmenager.spotifystreamer.R;
 
 public class SettingsActivity extends PreferenceActivity {
 
@@ -47,7 +49,8 @@ public class SettingsActivity extends PreferenceActivity {
 
             addPreferencesFromResource(R.xml.preferences);
 
-            mListPreference = (ListPreference) findPreference("country");
+            mListPreference = (ListPreference) findPreference(getActivity()
+                    .getString(R.string.pref_country_key));
 
             setCountryCodeList();
             mListPreference.setOnPreferenceChangeListener(this);
@@ -56,12 +59,15 @@ public class SettingsActivity extends PreferenceActivity {
                             .getDefaultSharedPreferences(mListPreference.getContext())
                             .getString(mListPreference.getKey(), mDefaultCountryCode));
 
-            Preference preference = findPreference("notification_visibility");
+            Preference preference = findPreference(getActivity()
+                    .getString(R.string.pref_notifications_key));
             preference.setOnPreferenceChangeListener(this);
             onPreferenceChange(preference,
                     PreferenceManager
                             .getDefaultSharedPreferences(preference.getContext())
-                            .getString(preference.getKey(), "PUBLIC"));
+                            .getString(preference.getKey(),
+                                    preference.getContext()
+                                            .getString(R.string.pref_notifications_public_values)));
         }
 
         @Override

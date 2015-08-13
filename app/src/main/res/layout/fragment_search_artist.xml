@@ -38,7 +38,8 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="150dp"
-                android:src="@drawable/ic_search_grey"/>
+                android:src="@drawable/ic_search_grey"
+                android:contentDescription="@string/no_result_image_content_description"/>
 
             <ProgressBar
                 android:id="@+id/progress_bar_search"

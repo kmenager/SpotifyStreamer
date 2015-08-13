@@ -41,9 +41,10 @@ import java.util.Map;
 
 import io.github.kmenager.spotifystreamer.MusicService;
 import io.github.kmenager.spotifystreamer.R;
-import io.github.kmenager.spotifystreamer.SettingsActivity;
+import io.github.kmenager.spotifystreamer.activities.SettingsActivity;
 import io.github.kmenager.spotifystreamer.SpotifySingleton;
 import io.github.kmenager.spotifystreamer.adapters.ArtistPageTopTrackAdapter;
+import io.github.kmenager.spotifystreamer.model.ArtistData;
 import io.github.kmenager.spotifystreamer.model.TrackData;
 import io.github.kmenager.spotifystreamer.utils.NetworkHelper;
 import io.github.kmenager.spotifystreamer.utils.PreferenceHelper;
@@ -57,25 +58,18 @@ import retrofit.client.Response;
 
 public class ArtistFragment extends Fragment {
 
-
-    private static final String TAG_SPOTIFY_REQUEST_FRAGMENT = "SPOTIFY_REQUEST_FRAGMENT_TRACK";
     private static final String ARTIST_NAME = "ARTIST_NAME";
     private static final String ARTIST_URL = "ARTIST_URL";
     private static final String ARTIST_ID = "ARTIST_ID";
     private View mHeaderList;
     private RecyclerView mRecyclerViewTopTrack;
     private View mErrorResultView;
-    private CollapsingToolbarLayout mCollapsingToolbar;
-    private ImageView mImageView;
     private boolean mTwoPane;
     private ArrayList<TrackData> mTracks = new ArrayList<>();
     private String mArtistId;
-    private MenuItem mMenuShare;
+    private ArtistData mArtistData;
     private ShareActionProvider provider;
     LocalBroadcastManager mLocalBroadcastManager;
-
-
-    private MediaPlayerDialogFragment mPlayer;
 
 
     private ArtistPageTopTrackAdapter.ArtistPageTopTrackAdapterOnClickHandler mHandler =
@@ -85,12 +79,10 @@ public class ArtistFragment extends Fragment {
                     if (NetworkHelper.isOnline(getActivity())) {
                         FragmentManager fm = getActivity().getSupportFragmentManager();
 
-                        mPlayer = MediaPlayerDialogFragment.newInstance(mTracks, vh.getLayoutPosition() - 1);
-                        mPlayer.show(fm, MediaPlayerDialogFragment.TAG_MEDIA_PLAYER);
-                        Intent audioService = new Intent(getActivity(), MusicService.class);
-                        getActivity().getApplicationContext().startService(audioService);
+                        MediaPlayerDialogFragment player = MediaPlayerDialogFragment.newInstance(mTracks, vh.getLayoutPosition() - 1, mArtistData);
+                        player.show(fm, MediaPlayerDialogFragment.TAG_MEDIA_PLAYER);
                     } else {
-                        Toast.makeText(getActivity(), "No internet Available", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), R.string.error_no_internet_available, Toast.LENGTH_SHORT).show();
                     }
                 }
             };
@@ -99,9 +91,6 @@ public class ArtistFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mPlayer != null) {
-            mPlayer.onAudioStop();
-        }
     }
 
     public static ArtistFragment newInstance(String artistId, String artistName, String artistUrl) {
@@ -153,25 +142,26 @@ public class ArtistFragment extends Fragment {
         textNoResut.setText(getString(R.string.no_top_tracks_found_text));
         mErrorResultView.setVisibility(View.INVISIBLE);
 
-        mCollapsingToolbar = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsing_toolbar);
-        if (mCollapsingToolbar == null) {
-            mTwoPane = true;
-        } else {
-            mTwoPane = false;
-        }
-        mImageView = (ImageView) rootView.findViewById(R.id.backdrop);
+        CollapsingToolbarLayout collapsingToolbar = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsing_toolbar);
+        mTwoPane = collapsingToolbar == null;
+        ImageView imageView = (ImageView) rootView.findViewById(R.id.backdrop);
 
         Bundle args = getArguments();
         if (args != null) {
+            mArtistData = new ArtistData();
+
             String artistName = args.getString(ARTIST_NAME);
+            mArtistData.setName(artistName);
             if (!mTwoPane) {
-                mCollapsingToolbar.setTitle(artistName);
+                collapsingToolbar.setTitle(artistName);
             } else {
                 ((TextView) rootView.findViewById(R.id.artist_name_header)).setText(artistName);
             }
             String artistUrl = args.getString(ARTIST_URL);
+
+            mArtistData.setUrlImage(artistUrl);
             if (artistUrl == null) {
-                mImageView.setImageResource(R.drawable.ic_empty_artist);
+                imageView.setImageResource(R.drawable.ic_empty_artist);
             } else {
                 Glide.with(this)
                         .load(artistUrl)
@@ -179,14 +169,17 @@ public class ArtistFragment extends Fragment {
                         .centerCrop()
                         .crossFade()
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .into(mImageView);
+                        .into(imageView);
             }
             mArtistId = args.getString(ARTIST_ID);
+            mArtistData.setArtistId(mArtistId);
         }
 
 
         return rootView;
     }
+
+
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -218,8 +211,7 @@ public class ArtistFragment extends Fragment {
         menu.findItem(R.id.action_playing).setVisible(!mTwoPane);
         menu.findItem(R.id.action_settings).setVisible(!mTwoPane);
 
-        mMenuShare = menu.findItem(R.id.action_share);
-        provider = (ShareActionProvider) MenuItemCompat.getActionProvider(mMenuShare);
+        provider = (ShareActionProvider) MenuItemCompat.getActionProvider(menu.findItem(R.id.action_share));
     }
 
     @Override
@@ -239,22 +231,14 @@ public class ArtistFragment extends Fragment {
                 if (trackDatas != null && trackDatas.size() > 0) {
                     FragmentManager fm = getActivity().getSupportFragmentManager();
                     MediaPlayerDialogFragment player = MediaPlayerDialogFragment.newInstance(trackDatas,
-                            currentPosition);
+                            currentPosition, mArtistData);
 
                     player.show(fm, MediaPlayerDialogFragment.TAG_MEDIA_PLAYER);
 
                     return true;
-                } else {
-                /*
-                new MaterialDialog.Builder(this)
-                        .title(R.string.no_music_title)
-                        .content(R.string.no_music_message)
-                        .positiveText(R.string.OK)
-                        .show();
-                        */
                 }
             } else {
-                Toast.makeText(getActivity(), "No music playing", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), R.string.error_no_music_playing, Toast.LENGTH_LONG).show();
             }
 
         }
@@ -299,7 +283,7 @@ public class ArtistFragment extends Fragment {
         protected List<TrackData> doInBackground(String... params) {
             Map<String, Object> options = new HashMap<>(1);
             String countryCode = PreferenceHelper.getCountryPreference(getActivity());
-            options.put("country", countryCode);
+            options.put(getActivity().getString(R.string.option_country_top_tracks), countryCode);
             final List<TrackData> trackDatas = new ArrayList<>();
             SpotifySingleton.getInstance().getService().getArtistTopTrack(params[0], options, new Callback<Tracks>() {
                 @Override

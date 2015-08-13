@@ -9,11 +9,17 @@ import com.neovisionaries.i18n.CountryCode;
 
 import java.util.Locale;
 
+import io.github.kmenager.spotifystreamer.R;
+
 public class PreferenceHelper {
 
+    /**
+     * Get the current preference country code
+     */
     public static String getCountryPreference(Context context) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return preferences.getString("country", getDefaultCountryCode());
+        return preferences.getString(context.getString(R.string.pref_country_key),
+                getDefaultCountryCode());
     }
 
     /**
@@ -23,18 +29,21 @@ public class PreferenceHelper {
         return CountryCode.getByLocale(Locale.getDefault()).getAlpha2();
     }
 
+    /**
+     * Get the preference notification
+     */
     public static int getNotificationVisibility(Context context) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String value = preferences.getString("notification_visibilty", "0");
-        switch (value) {
-            case "PUBLIC":
-                return Notification.VISIBILITY_PUBLIC;
-            case "PRIVATE":
-                return Notification.VISIBILITY_PRIVATE;
-            case "SECRET":
-                return Notification.VISIBILITY_SECRET;
+        String value = preferences.getString(context.getString(R.string.pref_notifications_key),
+                context.getString(R.string.pref_notifications_public_values));
+        if (context.getString(R.string.pref_notifications_public_values).equals(value)) {
+            return Notification.VISIBILITY_PUBLIC;
+        } else if (context.getString(R.string.pref_notifications_private_values).equals(value)) {
+            return Notification.VISIBILITY_PRIVATE;
+        } else if (context.getString(R.string.pref_notifications_secret_values).equals(value)) {
+            return Notification.VISIBILITY_SECRET;
+        } else {
+            return Notification.VISIBILITY_PRIVATE;
         }
-        return Notification.VISIBILITY_PRIVATE;
     }
-
 }

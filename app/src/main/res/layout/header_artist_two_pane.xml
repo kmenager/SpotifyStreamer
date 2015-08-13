@@ -15,7 +15,8 @@
         android:src="@drawable/ic_empty_artist"
         android:transitionName="@string/transition_image_key"
         tools:src="@drawable/ic_album_empty"
-        app:layout_columnWeight="1"/>
+        app:layout_columnWeight="1"
+        android:contentDescription="@string/row_artist_content_description"/>
 
     <TextView
         android:id="@+id/artist_name_header"

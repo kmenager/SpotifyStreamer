@@ -17,7 +17,8 @@
         android:maxHeight="300dp"
         android:layout_gravity="center_horizontal"
         tools:src="@drawable/ic_album_empty"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:contentDescription="@string/item_track_image_content_description"/>
 
     <LinearLayout
         android:layout_width="match_parent"

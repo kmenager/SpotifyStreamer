@@ -80,11 +80,7 @@ public class SearchArtistFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_search_artist, container, false);
-        if (rootView.findViewById(R.id.main_content) != null) {
-            mTwoPane = false;
-        } else {
-            mTwoPane = true;
-        }
+        mTwoPane = rootView.findViewById(R.id.main_content) == null;
         mErrorResultView = rootView.findViewById(R.id.no_result_view);
         TextView textNoResut = (TextView) mErrorResultView.findViewById(R.id.textview_no_result);
         textNoResut.setText(getString(R.string.no_result_found_text));

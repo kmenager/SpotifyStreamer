@@ -18,7 +18,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import io.github.kmenager.spotifystreamer.activities.ArtistActivity;
 import io.github.kmenager.spotifystreamer.activities.SearchActivity;
+import io.github.kmenager.spotifystreamer.model.ArtistData;
 import io.github.kmenager.spotifystreamer.model.TrackData;
 import io.github.kmenager.spotifystreamer.utils.AlbumArtCache;
 import io.github.kmenager.spotifystreamer.utils.PreferenceHelper;
@@ -41,6 +43,7 @@ public class MusicService extends Service implements
     public static final String ACTION_NEXT = "io.github.kmenager.spotifystreamer.next";
 
     private ArrayList<TrackData> mTracks;
+    private ArtistData mArtistData;
     private Handler mHandler = new Handler();
     private final IBinder mBinder = new LocalBinder();
     private static MediaPlayer mPlayer;
@@ -293,6 +296,14 @@ public class MusicService extends Service implements
         }
     }
 
+    public void setArtistData(ArtistData artistData) {
+        mArtistData = artistData;
+    }
+
+    public ArtistData getArtistData() {
+        return mArtistData;
+    }
+
     /**
      * Local binder to get this service
      */
@@ -407,9 +418,17 @@ public class MusicService extends Service implements
      * @return intent
      */
     private PendingIntent createContentIntent() {
+        Intent intent;
+        if (getResources().getBoolean(R.bool.is_two_pane)) {
+            intent = new Intent(getApplicationContext(), SearchActivity.class);
+        } else {
+            intent = new Intent(getApplicationContext(), ArtistActivity.class);
+            intent.putExtra(SearchActivity.ARTIST_INTENT, mArtistData);
+        }
+
         return PendingIntent.getActivity(getApplicationContext(),
                 REQUEST_CODE,
-                new Intent(getApplicationContext(), SearchActivity.class),
+                intent,
                 PendingIntent.FLAG_CANCEL_CURRENT);
     }
 

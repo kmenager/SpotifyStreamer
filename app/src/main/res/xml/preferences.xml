@@ -5,14 +5,14 @@
     android:layout_height="match_parent">
 
     <ListPreference
-        android:key="country"
-        android:title="Country code"/>
+        android:key="@string/pref_country_key"
+        android:title="@string/pref_country_title"/>
 
     <ListPreference
-        android:title="Notifications Visibility"
-        android:key="notification_visibility"
+        android:title="@string/pref_notification_title"
+        android:key="@string/pref_notifications_key"
         android:entries="@array/pref_notification_visibility"
         android:entryValues="@array/pref_notification_visibility_values"
-        android:defaultValue="PUBLIC" />
+        android:defaultValue="@string/pref_notifications_public_values" />
 
 </PreferenceScreen>

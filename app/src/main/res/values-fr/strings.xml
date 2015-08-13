@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="action_settings">Paramètres</string>
-    <string name="action_listen_now">A écouter</string>
-
-    <string name="open_content_desc">Ouvrir le panneau de navigation</string>
-    <string name="close_content_desc">Fermer le panneau de navigation</string>
+    <string name="menu_action_playing">En cours</string>
+    <string name="menu_action_share">Partager</string>
 
     <string name="edit_text_hint_toolbar">Rechercher de la musique</string>
 
@@ -13,4 +11,14 @@
 
     <string name="header_text_top_tracks">Top Titres</string>
     <string name="no_top_tracks_found_text">Aucun top titres trouvé.</string>
+
+    <string name="pref_country_title">Code pays</string>
+    <string name="pref_notification_title">Visibilité des notifications</string>
+    <string name="pref_notifications_public">Voir le contenu de toutes les notificaitons</string>
+    <string name="pref_notifications_private">Cacher le contenu sensible</string>
+    <string name="pref_notifications_secret">Ne pas montrer les notifications</string>
+
+    <string name="row_artist_content_description">Couverture de l\'artiste</string>
+    <string name="item_track_image_content_description">Couverture de l\'album</string>
+    <string name="no_result_image_content_description">Pas de résultat image</string>
 </resources>

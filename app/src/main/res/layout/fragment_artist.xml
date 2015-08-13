@@ -33,6 +33,7 @@
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_empty_artist"
                 android:transitionName="@string/transition_image_key"
+                android:contentDescription="@string/row_artist_content_description"
                 app:layout_collapseMode="parallax"/>
 
             <android.support.v7.widget.Toolbar

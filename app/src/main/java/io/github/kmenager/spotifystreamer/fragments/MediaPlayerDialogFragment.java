@@ -32,9 +32,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import io.github.kmenager.spotifystreamer.AudioPlayerService;
 import io.github.kmenager.spotifystreamer.MusicService;
 import io.github.kmenager.spotifystreamer.R;
+import io.github.kmenager.spotifystreamer.model.ArtistData;
 import io.github.kmenager.spotifystreamer.model.TrackData;
 import io.github.kmenager.spotifystreamer.utils.NetworkHelper;
 
@@ -42,6 +42,10 @@ public class MediaPlayerDialogFragment extends DialogFragment implements View.On
         SeekBar.OnSeekBarChangeListener, ServiceConnection {
 
     public static final String TAG_MEDIA_PLAYER = "MEDIA_PLAYER_FRAGMENT";
+    private static final String ARGS_LIST_TRACKS = "ARGS_LIST_TRACKS";
+    private static final String ARGS_CURRENT_POSITION = "ARGS_CURRENT_POSITION";
+    private static final String ARGS_ARTIST_DATA = "ARGS_ARTIST_DATA";
+    private static final String ARGS_SEEK_POSITION = "ARGS_SEEK_POSITION";
 
     private TextView mArtistName;
     private TextView mAlbumName;
@@ -58,25 +62,24 @@ public class MediaPlayerDialogFragment extends DialogFragment implements View.On
     private Drawable mPauseDrawable;
 
     private MusicService mMusicService;
-    private AudioPlayerService mAudioPlayerService;
     private TrackData mTrackData;
+    private ArtistData mArtistData;
     private ArrayList<TrackData> mTrackDatas;
     private boolean mIsPause;
-    private long mTimeElapsed;
     private static final long MAX_DURATION_30_SEC = 30 * 1000;
 
     private int mCurrentPosition;
-    private int mSeekTo = -1;
     LocalBroadcastManager mLocalBroadcastManager;
     private boolean mIsAlreadyUpdate;
 
-    public static MediaPlayerDialogFragment newInstance(ArrayList<TrackData> tracks, int layoutPosition) {
+    public static MediaPlayerDialogFragment newInstance(ArrayList<TrackData> tracks, int layoutPosition, ArtistData artistData) {
 
         MediaPlayerDialogFragment mediaPlayerDialogFragment = new MediaPlayerDialogFragment();
 
         Bundle args = new Bundle();
-        args.putParcelableArrayList("listtrack", tracks);
-        args.putInt("position", layoutPosition);
+        args.putParcelableArrayList(ARGS_LIST_TRACKS, tracks);
+        args.putInt(ARGS_CURRENT_POSITION, layoutPosition);
+        args.putParcelable(ARGS_ARTIST_DATA, artistData);
         mediaPlayerDialogFragment.setArguments(args);
         return mediaPlayerDialogFragment;
     }
@@ -88,16 +91,27 @@ public class MediaPlayerDialogFragment extends DialogFragment implements View.On
         mTrackData = null;
         Bundle args = getArguments();
         if (args != null) {
-            mTrackDatas = getArguments().getParcelableArrayList("listtrack");
-            mCurrentPosition = getArguments().getInt("position");
+            mTrackDatas = getArguments().getParcelableArrayList(ARGS_LIST_TRACKS);
+            mCurrentPosition = getArguments().getInt(ARGS_CURRENT_POSITION);
             mTrackData = mTrackDatas.get(mCurrentPosition);
+            mArtistData = getArguments().getParcelable(ARGS_ARTIST_DATA);
         }
 
+        setRetainInstance(true);
         Intent bindIntent = new Intent(getActivity().getApplicationContext(), MusicService.class);
-        getActivity().startService(bindIntent);
-        getActivity().bindService(bindIntent, this, Context.BIND_AUTO_CREATE);
+        getActivity().getApplicationContext().startService(bindIntent);
+        getActivity().getApplicationContext().bindService(bindIntent, this, Context.BIND_AUTO_CREATE);
 
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(getActivity());
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(ARGS_LIST_TRACKS, mTrackDatas);
+        outState.putInt(ARGS_CURRENT_POSITION, mCurrentPosition);
+        outState.putParcelable(ARGS_ARTIST_DATA, mArtistData);
+        outState.putInt(ARGS_SEEK_POSITION, mSeekBar.getProgress());
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -119,8 +133,7 @@ public class MediaPlayerDialogFragment extends DialogFragment implements View.On
     @Override
     public void onDestroy() {
         if (mMusicService != null) {
-            getActivity().unbindService(this);
-            mMusicService = null;
+            getActivity().getApplicationContext().unbindService(this);
         }
         super.onDestroy();
     }
@@ -143,8 +156,6 @@ public class MediaPlayerDialogFragment extends DialogFragment implements View.On
             DrawableCompat.setTint(mPauseDrawable, getResources().getColor(R.color.accent));
             DrawableCompat.setTintMode(mPauseDrawable, PorterDuff.Mode.SRC_ATOP);
         }
-
-        mAudioPlayerService = new AudioPlayerService();
 
         mArtistName = (TextView) rootView.findViewById(R.id.artistName);
 
@@ -170,12 +181,12 @@ public class MediaPlayerDialogFragment extends DialogFragment implements View.On
 
         mNext = (ImageButton) rootView.findViewById(R.id.next);
         mNext.setOnClickListener(this);
-        onUpdateView();
+        onUpdateView(savedInstanceState);
         return rootView;
     }
 
 
-    private void onUpdateView() {
+    private void onUpdateView(Bundle savedInstanceState) {
         if (!mIsAlreadyUpdate) {
             mArtistName.setText(mTrackData.getArtistName());
             mAlbumName.setText(mTrackData.getAlbumName());
@@ -194,11 +205,17 @@ public class MediaPlayerDialogFragment extends DialogFragment implements View.On
 
             mSeekBar.setMax((int) MAX_DURATION_30_SEC); //mTrackData.getDuration() for normal usage
 
-            mCurrentTime.setText(new SimpleDateFormat("m:ss", Locale.getDefault()).format(0));
+            mCurrentTime.setText(new SimpleDateFormat(getActivity().getString(R.string.format_time),
+                    Locale.getDefault()).format(0));
 
-            mDuration.setText("0:30");//new SimpleDateFormat("m:s", Locale.getDefault()).format(mTrackData.getDuration()));
+            mDuration.setText(R.string.default_thirty_seconds);//new SimpleDateFormat("m:s", Locale.getDefault()).format(mTrackData.getDuration()));
 
             onUpdateButton();
+        }
+
+        if (savedInstanceState != null) {
+            mCurrentTime.setText(new SimpleDateFormat(getActivity().getString(R.string.format_time),
+                    Locale.getDefault()).format(savedInstanceState.getInt(ARGS_SEEK_POSITION)));
         }
 
     }
@@ -233,19 +250,17 @@ public class MediaPlayerDialogFragment extends DialogFragment implements View.On
         mMusicService.onPlayTrack();
     }
 
-
-    public void onAudioStop() {
-        mPlay.setImageDrawable(mPlayDrawable);
-
-        if (mIsPause) {
-            mIsPause = false;
-        } else {
-            if (mMusicService != null) {
-                mMusicService.onAudioStop();
+    public void togglePlayPause() {
+        if (mMusicService != null) {
+            if (mMusicService.isPlaying()) {
+                onAudioPause();
+            } else {
+                if (mIsPause) {
+                    onAudioResume();
+                } else {
+                    onAudioStart();
+                }
             }
-            mSeekBar.setProgress(0);
-            mCurrentTime.setText(
-                    new SimpleDateFormat("m:ss", Locale.getDefault()).format(0));
         }
     }
 
@@ -264,23 +279,13 @@ public class MediaPlayerDialogFragment extends DialogFragment implements View.On
                 if (NetworkHelper.isOnline(getActivity())) {
                     if (mMusicService != null) {
                         mMusicService.onPlayNext();
-                        onUpdateView();
+                        onUpdateView(null);
                     }
                 }
                 break;
             case R.id.playPause:
                 if (NetworkHelper.isOnline(getActivity())) {
-                    if (mMusicService != null) {
-                        if (mMusicService.isPlaying()) {
-                            onAudioPause();
-                        } else {
-                            if (mIsPause) {
-                                onAudioResume();
-                            } else {
-                                onAudioStart();
-                            }
-                        }
-                    }
+                    togglePlayPause();
                 }
                 break;
             case R.id.previous:
@@ -308,13 +313,14 @@ public class MediaPlayerDialogFragment extends DialogFragment implements View.On
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
         mMusicService.removeCallback();
-        mSeekTo = seekBar.getProgress();
+        int seekTo = seekBar.getProgress();
         if (mMusicService.getPlayer() != null) {
             mMusicService.getPlayer().seekTo(seekBar.getProgress());
             mMusicService.setCallback();
         } else {
             mCurrentTime.setText(
-                    new SimpleDateFormat("m:ss", Locale.getDefault()).format(seekBar.getProgress()));
+                    new SimpleDateFormat(getActivity().getString(R.string.format_time),
+                            Locale.getDefault()).format(seekBar.getProgress()));
         }
     }
 
@@ -323,6 +329,12 @@ public class MediaPlayerDialogFragment extends DialogFragment implements View.On
         mMusicService = ((MusicService.LocalBinder) service).getService();
         mMusicService.setTracks(mTrackDatas);
         mMusicService.setPosition(mCurrentPosition);
+        mMusicService.setArtistData(mArtistData);
+        if (!mMusicService.isPlaying()) {
+            if (!mIsPause) {
+                onAudioStart();
+            }
+        }
     }
 
     @Override
@@ -336,12 +348,13 @@ public class MediaPlayerDialogFragment extends DialogFragment implements View.On
             if (intent.getAction().equals(MusicService.MEDIA_PLAYER_STATUS)) {
                 TrackData trackData = intent.getParcelableExtra(MusicService.TRACK_DATA);
                 if (trackData.getId().equals(mTrackData.getId())) {
-                    onUpdateView();
+                    onUpdateView(null);
                     if (mMusicService != null) {
-                        mTimeElapsed = mMusicService.getCurrentPosition();
-                        mSeekBar.setProgress((int) mTimeElapsed);
+                        long timeElapsed = mMusicService.getCurrentPosition();
+                        mSeekBar.setProgress((int) timeElapsed);
                         mCurrentTime.setText(
-                                new SimpleDateFormat("m:ss", Locale.getDefault()).format(mTimeElapsed));
+                                new SimpleDateFormat(context.getString(R.string.format_time),
+                                        Locale.getDefault()).format(timeElapsed));
                         mIsAlreadyUpdate = true;
                         if (mMusicService.isPlaying()) {
                             mPlay.setImageDrawable(mPauseDrawable);
@@ -355,7 +368,7 @@ public class MediaPlayerDialogFragment extends DialogFragment implements View.On
                 mIsAlreadyUpdate = false;
                 mTrackData = intent.getParcelableExtra(MusicService.TRACK_DATA);
                 mCurrentPosition = intent.getIntExtra(MusicService.TRACK_POSITION, mCurrentPosition);
-                onUpdateView();
+                onUpdateView(null);
             }
         }
     };
