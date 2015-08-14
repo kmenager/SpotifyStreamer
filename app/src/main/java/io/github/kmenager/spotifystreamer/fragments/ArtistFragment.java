@@ -41,8 +41,8 @@ import java.util.Map;
 
 import io.github.kmenager.spotifystreamer.MusicService;
 import io.github.kmenager.spotifystreamer.R;
-import io.github.kmenager.spotifystreamer.activities.SettingsActivity;
 import io.github.kmenager.spotifystreamer.SpotifySingleton;
+import io.github.kmenager.spotifystreamer.activities.SettingsActivity;
 import io.github.kmenager.spotifystreamer.adapters.ArtistPageTopTrackAdapter;
 import io.github.kmenager.spotifystreamer.model.ArtistData;
 import io.github.kmenager.spotifystreamer.model.TrackData;
@@ -61,11 +61,15 @@ public class ArtistFragment extends Fragment {
     private static final String ARTIST_NAME = "ARTIST_NAME";
     private static final String ARTIST_URL = "ARTIST_URL";
     private static final String ARTIST_ID = "ARTIST_ID";
+
+    private static final String ARGS_TOP_TRACKS = "ARGS_TOP_TRACKS";
+    private static final String ARGS_ARTIST_DATA = "ARGS_ARTIST_DATA";
+
     private View mHeaderList;
     private RecyclerView mRecyclerViewTopTrack;
     private View mErrorResultView;
     private boolean mTwoPane;
-    private ArrayList<TrackData> mTracks = new ArrayList<>();
+    private ArrayList<TrackData> mTracks;
     private String mArtistId;
     private ArtistData mArtistData;
     private ShareActionProvider provider;
@@ -148,10 +152,9 @@ public class ArtistFragment extends Fragment {
 
         Bundle args = getArguments();
         if (args != null) {
-            mArtistData = new ArtistData();
 
             String artistName = args.getString(ARTIST_NAME);
-            mArtistData.setName(artistName);
+
             if (!mTwoPane) {
                 collapsingToolbar.setTitle(artistName);
             } else {
@@ -159,7 +162,7 @@ public class ArtistFragment extends Fragment {
             }
             String artistUrl = args.getString(ARTIST_URL);
 
-            mArtistData.setUrlImage(artistUrl);
+
             if (artistUrl == null) {
                 imageView.setImageResource(R.drawable.ic_empty_artist);
             } else {
@@ -172,13 +175,18 @@ public class ArtistFragment extends Fragment {
                         .into(imageView);
             }
             mArtistId = args.getString(ARTIST_ID);
-            mArtistData.setArtistId(mArtistId);
+
+            if (mArtistData == null) {
+                mArtistData = new ArtistData();
+                mArtistData.setArtistId(mArtistId);
+                mArtistData.setName(artistName);
+                mArtistData.setUrlImage(artistUrl);
+            }
         }
 
 
         return rootView;
     }
-
 
 
     @Override
@@ -190,12 +198,33 @@ public class ArtistFragment extends Fragment {
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(ARGS_TOP_TRACKS, mTracks);
+        outState.putParcelable(ARGS_ARTIST_DATA, mArtistData);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            mTracks = savedInstanceState.getParcelableArrayList(ARGS_TOP_TRACKS);
+            mArtistData = savedInstanceState.getParcelable(ARGS_ARTIST_DATA);
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         mLocalBroadcastManager
                 .registerReceiver(mReceiver, new IntentFilter(MusicService.MEDIA_PLAYER_NEW_TRACK));
-        GetTopTrackTask topTrackTask = new GetTopTrackTask();
-        topTrackTask.execute(mArtistId);
+        if (mTracks == null) {
+            mTracks = new ArrayList<>();
+            GetTopTrackTask topTrackTask = new GetTopTrackTask();
+            topTrackTask.execute(mArtistId);
+        } else {
+            refreshAdapter(mTracks, mHandler);
+        }
     }
 
     @Override
@@ -324,7 +353,9 @@ public class ArtistFragment extends Fragment {
 
                 @Override
                 public void failure(RetrofitError error) {
-                    Log.e("FAILED", error.getResponse().getReason());
+                    if (error != null) {
+                        Log.e("FAILED", error.getResponse().getReason());
+                    }
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {

@@ -97,7 +97,6 @@ public class MediaPlayerDialogFragment extends DialogFragment implements View.On
             mArtistData = getArguments().getParcelable(ARGS_ARTIST_DATA);
         }
 
-        setRetainInstance(true);
         Intent bindIntent = new Intent(getActivity().getApplicationContext(), MusicService.class);
         getActivity().getApplicationContext().startService(bindIntent);
         getActivity().getApplicationContext().bindService(bindIntent, this, Context.BIND_AUTO_CREATE);
